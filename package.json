@@ -1,0 +1,11 @@
+{
+  "name": "agentic-sdlc-demo",
+  "version": "1.0.0",
+  "description": "Live demo: Monday ticket → PRD → plan → PR, with Claude Code. Zero dependencies.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
