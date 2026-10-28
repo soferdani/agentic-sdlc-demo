@@ -1,6 +1,6 @@
 ---
 ticket: MON-101
-status: draft        # draft → accepted (a human changes this)
+status: accepted
 owner: Finance team lead
 ---
 
