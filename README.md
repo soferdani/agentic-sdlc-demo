@@ -58,7 +58,7 @@ git commit -am "MON-101: accept spec"
 ### 2. PRD → plan
 
 ```
-/plan invoice-status-filter
+/plan <slug>
 ```
 
 The agent reads the code and writes `docs/plans/invoice-status-filter.md`: files to change, tests to add, order of work, risks. Commits, **stops**.
@@ -72,7 +72,7 @@ git commit -am "MON-101: accept plan"
 ### 3. Plan → PR
 
 ```
-/implement invoice-status-filter
+/implement <slug>
 ```
 
 The agent creates a branch, writes the code and tests, runs `npm test` until green, pushes, opens a PR, posts a self-review ranked by `REVIEW.md`, and **stops**.
@@ -128,7 +128,7 @@ To make rule two physical in your own repo: Settings → Branches → protect `m
 
 ```bash
 git checkout main
-git branch -D feature/MON-101-invoice-status-filter
+git branch -D feature/MON-101-<slug>
 git log --oneline            # find the "intent + spec", "accept", "plan" commits
 git revert --no-edit <oldest-sha>^..<newest-sha>
 ```
