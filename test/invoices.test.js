@@ -70,6 +70,37 @@ test("GET /api/invoices returns JSON list", async () => {
   });
 });
 
+test("GET /api/invoices?status=open returns exactly the 3 open invoices newest first", async () => {
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/api/invoices?status=open`);
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.deepEqual(body.map((i) => i.id), [1006, 1003, 1001]);
+  });
+});
+
+test("GET /api/invoices?status=paid and cancelled return 2 and 1", async () => {
+  await withServer(async (base) => {
+    for (const [status, count] of [["paid", 2], ["cancelled", 1]]) {
+      const res = await fetch(`${base}/api/invoices?status=${status}`);
+      assert.equal(res.status, 200);
+      const body = await res.json();
+      assert.equal(body.length, count);
+      assert.ok(body.every((i) => i.status === status));
+    }
+  });
+});
+
+test("GET /api/invoices?status=bogus returns 400 with a JSON error body", async () => {
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/api/invoices?status=bogus`);
+    assert.equal(res.status, 400);
+    assert.match(res.headers.get("content-type"), /application\/json/);
+    const body = await res.json();
+    assert.equal(typeof body.error, "string");
+  });
+});
+
 test("GET /api/invoices/:id returns 404 for unknown id", async () => {
   await withServer(async (base) => {
     const res = await fetch(`${base}/api/invoices/4242`);

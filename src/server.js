@@ -27,7 +27,11 @@ function handle(req, res) {
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
 
   if (req.method === "GET" && url.pathname === "/api/invoices") {
-    return json(res, 200, listInvoices());
+    try {
+      return json(res, 200, listInvoices({ status: url.searchParams.get("status") }));
+    } catch (err) {
+      return json(res, 400, { error: err.message });
+    }
   }
 
   const one = url.pathname.match(/^\/api\/invoices\/(\d+)$/);
