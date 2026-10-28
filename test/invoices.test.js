@@ -129,6 +129,13 @@ test("GET /?status=open renders a table with exactly 3 data rows", async () => {
   });
 });
 
+test("GET / contains a status picker linking to /?status=<value>", async () => {
+  await withServer(async (base) => {
+    const html = await (await fetch(`${base}/`)).text();
+    for (const s of STATUSES) assert.match(html, new RegExp(`href="/\\?status=${s}"`));
+  });
+});
+
 test("GET /?status=bogus returns 400", async () => {
   await withServer(async (base) => {
     const res = await fetch(`${base}/?status=bogus`);
