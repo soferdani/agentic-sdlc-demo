@@ -11,10 +11,18 @@ const INVOICES = [
 /** The known invoice statuses; single source of truth for validation and the page picker. */
 const STATUSES = ["open", "paid", "cancelled"];
 
-/** Returns invoices newest first, optionally only those with the given status. */
+/**
+ * Returns invoices newest first, optionally only those with the given status.
+ * Status matching is case-insensitive; an empty or missing status means no filter.
+ * Throws an Error for a status that is not in STATUSES.
+ */
 function listInvoices({ status } = {}) {
+  const wanted = String(status ?? "").trim().toLowerCase();
+  if (wanted && !STATUSES.includes(wanted)) {
+    throw new Error(`unknown status "${wanted}"; expected one of: ${STATUSES.join(", ")}`);
+  }
   const sorted = [...INVOICES].sort((a, b) => (a.issued < b.issued ? 1 : -1));
-  return status ? sorted.filter((inv) => inv.status === status) : sorted;
+  return wanted ? sorted.filter((inv) => inv.status === wanted) : sorted;
 }
 
 /** Returns one invoice by id, or undefined. */

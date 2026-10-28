@@ -30,6 +30,19 @@ test("listInvoices returns paid and cancelled counts", () => {
   assert.equal(listInvoices({ status: "cancelled" }).length, 1);
 });
 
+test("listInvoices normalises case and treats empty as no filter", () => {
+  assert.equal(listInvoices({ status: "OPEN" }).length, 3);
+  assert.equal(listInvoices({ status: "" }).length, 6);
+});
+
+test("listInvoices throws on unknown status", () => {
+  assert.throws(() => listInvoices({ status: "bogus" }), (err) => {
+    assert.ok(err instanceof Error);
+    for (const s of STATUSES) assert.match(err.message, new RegExp(s));
+    return true;
+  });
+});
+
 test("getInvoice finds by id and returns undefined for unknown", () => {
   assert.equal(getInvoice(1003).customer, "Tel Aviv Sorting Hub");
   assert.equal(getInvoice("1003").id, 1003);
