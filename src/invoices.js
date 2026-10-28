@@ -11,9 +11,10 @@ const INVOICES = [
 /** The known invoice statuses; single source of truth for validation and the page picker. */
 const STATUSES = ["open", "paid", "cancelled"];
 
-/** Returns all invoices, newest first. */
-function listInvoices() {
-  return [...INVOICES].sort((a, b) => (a.issued < b.issued ? 1 : -1));
+/** Returns invoices newest first, optionally only those with the given status. */
+function listInvoices({ status } = {}) {
+  const sorted = [...INVOICES].sort((a, b) => (a.issued < b.issued ? 1 : -1));
+  return status ? sorted.filter((inv) => inv.status === status) : sorted;
 }
 
 /** Returns one invoice by id, or undefined. */

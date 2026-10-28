@@ -20,6 +20,16 @@ test("listInvoices without status returns all", () => {
   assert.equal(listInvoices({}).length, 6);
 });
 
+test("listInvoices filters by status, newest first", () => {
+  const open = listInvoices({ status: "open" });
+  assert.deepEqual(open.map((i) => i.id), [1006, 1003, 1001]);
+});
+
+test("listInvoices returns paid and cancelled counts", () => {
+  assert.equal(listInvoices({ status: "paid" }).length, 2);
+  assert.equal(listInvoices({ status: "cancelled" }).length, 1);
+});
+
 test("getInvoice finds by id and returns undefined for unknown", () => {
   assert.equal(getInvoice(1003).customer, "Tel Aviv Sorting Hub");
   assert.equal(getInvoice("1003").id, 1003);
