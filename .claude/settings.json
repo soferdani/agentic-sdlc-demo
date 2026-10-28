@@ -1,9 +1,31 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm test*)",
+      "Bash(npm start*)",
+      "Bash(node *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout -b *)",
+      "Bash(git push *)",
+      "Bash(gh pr *)"
+    ],
+    "deny": ["Read(./.env)", "Read(./.env.*)", "Read(./config/secrets.json)"]
+  },
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit",
         "hooks": [{ "type": "command", "command": "node .claude/hooks/protect_paths.js" }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{ "type": "command", "command": "node .claude/hooks/tests_before_stop.js", "timeout": 180 }]
       }
     ]
   }

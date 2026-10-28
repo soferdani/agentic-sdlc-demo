@@ -88,7 +88,9 @@ npm start       # try http://localhost:3000/api/invoices?status=open
 **Your job (gate 3):** read the diff. Did it build what the spec says, nothing more? If yes, approve the PR.
 If not, do **not** fix the code by hand. Comment on the PR (or tell the agent in the chat) what to change, and run `/implement` again.
 
-Done? Go back to `main` and take **MON-102**, **MON-103** or **MON-104**. MON-103 is a trap.
+Done? Go back to `main` and take **MON-103** (it is a trap).
+
+Finished early, or want the advanced part? **[Two tickets at once, unattended](docs/parallel.md)**: `/ship` runs the whole loop with the PR as the only gate, a Stop hook keeps it honest, and two agents work in parallel worktrees.
 
 ## Stuck?
 
@@ -107,7 +109,8 @@ REVIEW.md                     the checklist every PR is reviewed against
 .claude/commands/prd.md       /prd <ticket>     -> docs/intent.md + docs/specs/<slug>.md, then STOPS
 .claude/commands/plan.md      /plan <slug>      -> docs/plans/<slug>.md, then STOPS
 .claude/commands/implement.md /implement <slug> -> branch, code, tests, PR, then STOPS
-.claude/settings.json         hook: the agent cannot touch .env / secrets
+.claude/commands/ship.md      /ship <ticket>    -> the whole loop unattended, PR is the only gate (docs/parallel.md)
+.claude/settings.json         hooks: cannot touch secrets; cannot finish with red tests. Allow-list for unattended runs
 docs/tickets.md               four tickets standing in for the Monday board
 docs/templates/spec.md        the PRD template
 scripts/doctor.js             npm run doctor: checks your setup

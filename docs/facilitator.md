@@ -13,6 +13,19 @@ One line to say at the start: **"You are not writing code today. You are accepti
 | 18–25 | `/implement`. Pairs that finish early take MON-102 or MON-104. |
 | 25–30 | gate 3: pull, run, diff. Ask: "Who found something the self-review missed?" |
 
+## Optional third segment (12–15 min): two tickets at once, unattended
+
+For the people who finished, or as the closing segment after the talk. Script in `docs/parallel.md`.
+
+| min | what |
+|---|---|
+| 0–2 | say the one line: "the gates don't disappear, they move to the PR. What makes that safe is the harness, not the prompt." Point at the Stop hook and the allow-list in `.claude/settings.json`. |
+| 2–4 | everyone: two terminals, `claude -w mon-102` + `/ship MON-102`, `claude -w mon-104` + `/ship MON-104`. |
+| 4–10 | agents run. Walk around. Ask people to watch for the Stop hook firing (red tests → sent back). |
+| 10–15 | `gh pr list`, open one PR each, read the "Open questions" in the spec. Ask: "which assumption would you have made differently?" |
+
+Traps: trust dialog not accepted (allow-list ignored, agent asks for every command: answer yes, carry on); `gh` not logged in (branch exists locally, review with `git diff main`); two agents finish within seconds of each other and both PRs are fine, which makes the point better than any slide.
+
 ## Walking around: what to look for
 
 - Someone editing code by hand. Stop them. Fix the spec, the plan, or CLAUDE.md, rerun.
