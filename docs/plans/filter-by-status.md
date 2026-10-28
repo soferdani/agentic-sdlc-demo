@@ -1,6 +1,6 @@
 ---
 ticket: MON-101
-status: draft
+status: accepted
 spec: docs/specs/filter-by-status.md
 ---
 
