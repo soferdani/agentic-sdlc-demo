@@ -117,3 +117,22 @@ test("GET / renders an HTML table with every invoice", async () => {
     assert.equal((html.match(/<tr><td>/g) || []).length, 6);
   });
 });
+
+test("GET /?status=open renders a table with exactly 3 data rows", async () => {
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/?status=open`);
+    assert.equal(res.status, 200);
+    const html = await res.text();
+    const rows = html.match(/<tr><td>.*?<\/tr>/g) || [];
+    assert.equal(rows.length, 3);
+    assert.ok(rows.every((r) => /<td>open<\/td>/.test(r)));
+  });
+});
+
+test("GET /?status=bogus returns 400", async () => {
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/?status=bogus`);
+    assert.equal(res.status, 400);
+    assert.match(res.headers.get("content-type"), /text\/html/);
+  });
+});

@@ -8,6 +8,15 @@ function json(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+}
+
+function errorPage(message) {
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Bad request</title></head>
+<body><h1>Bad request</h1><p>${escapeHtml(message)}</p><p><a href="/">Back to all invoices</a></p></body></html>`;
+}
+
 function page(invoices) {
   const rows = invoices
     .map(
@@ -41,8 +50,15 @@ function handle(req, res) {
   }
 
   if (req.method === "GET" && url.pathname === "/") {
+    let invoices;
+    try {
+      invoices = listInvoices({ status: url.searchParams.get("status") });
+    } catch (err) {
+      res.writeHead(400, { "Content-Type": "text/html; charset=utf-8" });
+      return res.end(errorPage(err.message));
+    }
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    return res.end(page(listInvoices()));
+    return res.end(page(invoices));
   }
 
   json(res, 404, { error: "not found" });
