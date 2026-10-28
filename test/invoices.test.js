@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const http = require("node:http");
-const { listInvoices, getInvoice } = require("../src/invoices");
+const { STATUSES, listInvoices, getInvoice } = require("../src/invoices");
 const { handle } = require("../src/server");
 
 test("listInvoices returns all invoices newest first", () => {
@@ -9,6 +9,15 @@ test("listInvoices returns all invoices newest first", () => {
   assert.equal(all.length, 6);
   assert.equal(all[0].id, 1006);
   assert.equal(all[all.length - 1].id, 1001);
+});
+
+test("STATUSES lists the three known statuses", () => {
+  assert.deepEqual(STATUSES, ["open", "paid", "cancelled"]);
+});
+
+test("listInvoices without status returns all", () => {
+  assert.equal(listInvoices().length, 6);
+  assert.equal(listInvoices({}).length, 6);
 });
 
 test("getInvoice finds by id and returns undefined for unknown", () => {

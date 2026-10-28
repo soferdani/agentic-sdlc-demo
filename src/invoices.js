@@ -8,6 +8,9 @@ const INVOICES = [
   { id: 1006, customer: "Eilat Branch", amount: 640.0, status: "open", issued: "2026-10-15" },
 ];
 
+/** The known invoice statuses; single source of truth for validation and the page picker. */
+const STATUSES = ["open", "paid", "cancelled"];
+
 /** Returns all invoices, newest first. */
 function listInvoices() {
   return [...INVOICES].sort((a, b) => (a.issued < b.issued ? 1 : -1));
@@ -18,4 +21,4 @@ function getInvoice(id) {
   return INVOICES.find((inv) => inv.id === Number(id));
 }
 
-module.exports = { listInvoices, getInvoice };
+module.exports = { STATUSES, listInvoices, getInvoice };
