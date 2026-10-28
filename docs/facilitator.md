@@ -13,7 +13,20 @@ One line to say at the start: **"You are not writing code today. You are accepti
 | 18–25 | `/implement`. Pairs that finish early take MON-102 or MON-104. |
 | 25–30 | gate 3: pull, run, diff. Ask: "Who found something the self-review missed?" |
 
-## Optional third segment (12–15 min): two tickets at once, unattended
+## Third segment (10–15 min): the loop in their own repo
+
+Script in `docs/your-repo.md`. This is the one to run; the parallel segment below is a bonus for the fast ones.
+
+| min | what |
+|---|---|
+| 0–2 | everyone opens their own repo and runs `node <demo>/kit/install.js`. No Node: copy the five files from `kit/`. |
+| 2–7 | `/prd <pasted Monday ticket>`. Walk around: is the ticket small enough? Did it stop? Read one open-questions list aloud. |
+| 7–12 | they answer, set accepted, `/plan <slug>`. Ask each person: "did it name the right files?" Every wrong file is a CLAUDE.md line, write it now. |
+| 12–15 | close: "you just wrote the PRD and plan for a real ticket. Tomorrow, `/implement`. Send me the PR." |
+
+Traps: someone picks a project-sized ticket (make them pick a smaller one); a repo with no CLAUDE.md (`/init` first); the agent writes code during `/prd` (tell it to revert, follow the command); huge monorepo (add "Relevant area: ..." to the ticket text).
+
+## Bonus segment (12–15 min): two tickets at once, unattended
 
 For the people who finished, or as the closing segment after the talk. Script in `docs/parallel.md`.
 

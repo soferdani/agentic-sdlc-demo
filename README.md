@@ -90,6 +90,8 @@ If not, do **not** fix the code by hand. Comment on the PR (or tell the agent in
 
 Done? Go back to `main` and take **MON-103** (it is a trap).
 
+**Next: [the loop in your own repo](docs/your-repo.md)** (10–15 min): install the kit from `kit/`, paste a real Monday ticket, get a PRD and a plan against your real code.
+
 Finished early, or want the advanced part? **[Two tickets at once, unattended](docs/parallel.md)**: `/ship` runs the whole loop with the PR as the only gate, a Stop hook keeps it honest, and two agents work in parallel worktrees.
 
 ## Stuck?
@@ -115,6 +117,7 @@ docs/tickets.md               four tickets standing in for the Monday board
 docs/templates/spec.md        the PRD template
 scripts/doctor.js             npm run doctor: checks your setup
 .github/workflows/ci.yml      npm test on every PR
+kit/                          the five files to copy into your own repo (kit/install.js)
 ```
 
 Three rules the repo enforces: nothing is implemented without an accepted plan; the agent opens PRs but never approves or merges them; findings rank, humans decide.
