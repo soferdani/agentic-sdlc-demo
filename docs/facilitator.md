@@ -55,4 +55,4 @@ Traps: trust dialog not accepted (allow-list ignored, agent asks for every comma
 
 ## Reset for the next group
 
-See README "Reset". Or delete the repo copy and recreate from the template.
+See docs/workshop.md "Reset". Or delete the repo copy and recreate from the template.

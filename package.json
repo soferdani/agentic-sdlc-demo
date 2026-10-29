@@ -1,7 +1,7 @@
 {
   "name": "agentic-sdlc-demo",
   "version": "1.0.0",
-  "description": "Live demo: Monday ticket → PRD → plan → PR, with Claude Code. Zero dependencies.",
+  "description": "Ticket → PRD → plan → PR with a human gate at each step. Agent Skill + Claude Code commands + hooks + a zero-dependency demo app.",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

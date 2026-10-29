@@ -1,136 +1,134 @@
 # agentic-sdlc-demo
 
-A hands-on kit for the agentic SDLC loop with [Claude Code](https://claude.com/claude-code):
-**ticket → PRD → plan → PR**, with a human gate at each step and the agent doing the work in between.
+**Ticket → PRD → plan → PR. The agent does the work, a human says yes three times.**
 
-The app is deliberately tiny: an invoices list served by `node:http`, tested with `node:test`, zero dependencies.
-You will not write code today. You will accept or reject what the agent writes.
+[![tests](https://github.com/soferdani/agentic-sdlc-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/soferdani/agentic-sdlc-demo/actions/workflows/ci.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Agent Skills](https://img.shields.io/badge/skill-agentic--sdlc--loop-8A2BE2)](skills/agentic-sdlc-loop/SKILL.md)
+![zero dependencies](https://img.shields.io/badge/dependencies-0-success)
 
-## Before the workshop (5 minutes)
+Most "AI coding" setups put the human in the wrong place: watching the agent type, nudging it line by line.
+This repo puts the human at three gates instead, and lets the agent run alone between them.
 
-You need: **Node 20+**, **git**, **Claude Code** (logged in), and ideally the **GitHub CLI** (`gh`, logged in).
+```
+ ticket ──► intent + spec ──┤gate 1├──► plan ──┤gate 2├──► branch + tests + PR ──┤gate 3├──► merge
+             (agent)        accept    (agent)  accept        (agent)              human review
+```
 
-1. Make your own copy of this repo. Pick one:
+Every step ends as a **file in git** (`docs/intent.md`, `docs/specs/<slug>.md`, `docs/plans/<slug>.md`, a PR).
+The next step refuses to run until a human flips `status: draft` to `status: accepted`. The agent never approves or merges its own work.
 
-   ```bash
-   # with gh (recommended: you get your own repo, PRs open there)
-   gh repo create agentic-sdlc-demo --template soferdani/agentic-sdlc-demo --public --clone
-   cd agentic-sdlc-demo
-   ```
-   Or on GitHub click **Use this template → Create a new repository**, then clone yours.
-   Or, without GitHub: `git clone https://github.com/soferdani/agentic-sdlc-demo` (you can still do everything except open a PR).
+It ships as three things, pick what you need:
 
-2. Check your setup:
+| | What | For |
+|---|---|---|
+| **Skill** | [`skills/agentic-sdlc-loop/`](skills/agentic-sdlc-loop/SKILL.md), one `SKILL.md` in the [Agent Skills](https://agentskills.io) format | Claude Code, Cursor, Copilot, Codex CLI, Gemini CLI, any agent that reads skills |
+| **Slash commands** | `/prd`, `/plan`, `/implement`, `/ship` + `REVIEW.md` + a spec template, installed by [`kit/install.js`](kit/install.js) | Claude Code users who want the steps as separate commands |
+| **Demo repo** | A 100-line invoices app, 4 tickets, hooks, CI, branch protection notes | Trying the loop in 10 minutes, or running a [team workshop](docs/workshop.md) |
 
-   ```bash
-   npm run doctor
-   npm test        # 5 tests should pass
-   npm start       # open http://localhost:3000, then Ctrl+C
-   ```
+## Try it in 10 minutes
 
-If `doctor` prints `All good`, you are ready.
-
-## The workshop (about 30 minutes)
-
-Open Claude Code inside the repo:
+You need Node 20+, git, and [Claude Code](https://claude.com/claude-code). `gh` (GitHub CLI) if you want the PR step.
 
 ```bash
+gh repo create agentic-sdlc-demo --template soferdani/agentic-sdlc-demo --public --clone
+cd agentic-sdlc-demo
+npm run doctor     # checks node, git, gh, claude
+npm test           # 5 tests pass
 claude
 ```
 
-Pick a ticket in `docs/tickets.md`. Start with **MON-101** (filter invoices by status). Then follow the loop.
-
-### 1. Ticket → PRD
+Then inside Claude Code:
 
 ```
-/prd MON-101
+/prd MON-101            # ticket → docs/intent.md + docs/specs/<slug>.md, then STOPS with open questions
 ```
+Answer the questions in the spec, set `status: accepted`, commit.
+```
+/plan <slug>            # spec → docs/plans/<slug>.md (files, tests, order, risks), then STOPS
+```
+Read it, set `status: accepted`, commit.
+```
+/implement <slug>       # plan → branch, code, tests green, push, PR + ranked self-review, then STOPS
+```
+Pull the branch, run it, approve or comment. **Do not fix the code by hand.** If it's wrong, fix the spec, the plan, or `CLAUDE.md`, and run again. That is the habit the loop is teaching.
 
-The agent writes `docs/intent.md` and `docs/specs/invoice-status-filter.md`, commits them, and **stops** with a list of open questions.
+Done? Take `MON-103`. It's a trap.
 
-**Your job (gate 1):** open the spec. Answer each open question in the file, delete the ones you don't care about,
-change `status: draft` to `status: accepted`, and commit:
+## Use it in your own repo
+
+**As a skill** (any agent that supports `SKILL.md`): copy `skills/agentic-sdlc-loop/` into your agent's skills folder
+(`.claude/skills/` for Claude Code), then ask: *"run the loop on this ticket: …"*. The skill reads the state of `docs/` and knows which step is next.
+
+**As slash commands** (Claude Code): from the root of your repo
 
 ```bash
-git commit -am "MON-101: accept spec"
+node <path-to-this-repo>/kit/install.js
 ```
 
-### 2. PRD → plan
+adds five files and never overwrites anything you already have:
 
 ```
-/plan <slug>
+.claude/commands/prd.md        .claude/commands/plan.md        .claude/commands/implement.md
+docs/templates/spec.md         REVIEW.md
 ```
 
-The agent reads the code and writes `docs/plans/invoice-status-filter.md`: files to change, tests to add, order of work, risks. Commits, **stops**.
+First run on a real ticket: pick something half-a-day sized, paste it into `/prd`, read the open questions.
+Those are the decisions you would have made silently while coding. See [docs/your-repo.md](docs/your-repo.md).
 
-**Your job (gate 2):** read the plan. If something is wrong, tell the agent in the chat and let it rewrite the plan. When you agree, set `status: accepted` and commit:
+## Make the gates physical
+
+A prompt that says "stop" is a request. These make it a rule:
+
+- **Stop hook** [`.claude/hooks/tests_before_stop.js`](.claude/hooks/tests_before_stop.js): the agent cannot end its turn while `npm test` is red. (Checked: green → exit 0, red → exit 2, re-entry → exit 0, no infinite loop.)
+- **PreToolUse hook** [`.claude/hooks/protect_paths.js`](.claude/hooks/protect_paths.js): the agent cannot edit `.env*`, `secrets.json`, certificates.
+- **Allow-list** in [`.claude/settings.json`](.claude/settings.json): test, commit, push, `gh pr` run without prompts; everything else asks.
+- **Branch protection** on `main`: require a PR, the `test` check, one approval. Settings → Branches. Now the agent *can't* merge, whatever the prompt says.
+- **`REVIEW.md`**: the checklist every PR is ranked against. Findings rank; a code owner decides.
+
+## Unattended: two tickets at once
+
+Once the artifacts and guardrails exist, the three gates can collapse to one (the PR) and you can run agents in parallel worktrees:
 
 ```bash
-git commit -am "MON-101: accept plan"
+claude -w mon-102      # terminal 1
+/ship MON-102
+claude -w mon-104      # terminal 2
+/ship MON-104
 ```
 
-### 3. Plan → PR
+Walk away. Come back to two PRs, each with its spec, plan and assumptions on the branch. [docs/parallel.md](docs/parallel.md).
+
+## What's in the repo
 
 ```
-/implement <slug>
+skills/agentic-sdlc-loop/     the skill: SKILL.md + references/ (one file per step) + assets/ + scripts/install.js
+kit/                          the same loop as five plain files + kit/install.js
+.claude/commands/             /prd  /plan  /implement  /ship
+.claude/hooks/                protect secrets · tests must pass before the agent may stop
+.claude/settings.json         hooks + allow-list for unattended runs
+CLAUDE.md                     conventions the agent reads every session (+ "Known mistakes", append as they happen)
+REVIEW.md                     the PR checklist
+docs/tickets.md               four tickets standing in for the board (MON-101..104)
+docs/templates/spec.md        the one-screen PRD template
+docs/workshop.md              run this as a 30-min hands-on with your team · docs/facilitator.md · docs/your-repo.md · docs/parallel.md
+src/  test/                   the invoices app: node:http + node:test, zero dependencies
 ```
 
-The agent creates a branch, writes the code and tests, runs `npm test` until green, pushes, opens a PR, posts a self-review ranked by `REVIEW.md`, and **stops**.
+## Why it's shaped like this
 
-### 4. Review like a human
+- **Files, not chat.** Intent, spec and plan live in git next to the code. Reviewable, diffable, blame-able. A chat transcript is none of those.
+- **Open questions are the product of step 1.** A spec with no open questions means the agent guessed. Make it list what it decided alone.
+- **Wrong file in the plan = missing line in `CLAUDE.md`.** Every mistake becomes one line under "Known mistakes". The repo gets smarter; the prompts don't grow.
+- **The agent never grades itself.** It posts a ranked self-review headed "not an approval". A human approves.
 
-```bash
-git checkout feature/MON-101-invoice-status-filter
-npm test
-npm start       # try http://localhost:3000/api/invoices?status=open
-```
+Built for a workshop with an enterprise dev team in Israel (Oct 2026), based on the [AI-native SDLC playbook](https://claude.com/resources/articles/the-ai-native-sdlc-playbook). If you run it with your team, I'd like to hear what broke: open an issue.
 
-**Your job (gate 3):** read the diff. Did it build what the spec says, nothing more? If yes, approve the PR.
-If not, do **not** fix the code by hand. Comment on the PR (or tell the agent in the chat) what to change, and run `/implement` again.
+## Contributing
 
-Done? Go back to `main` and take **MON-103** (it is a trap).
+Issues and PRs welcome. Keep the app tiny and dependency-free. A new ticket in `docs/tickets.md` should be buildable by the agent in a few minutes and have a clear "done when".
+If the loop fails in your repo in an interesting way, that story is worth more than a feature; open an issue.
 
-**Next: [the loop in your own repo](docs/your-repo.md)** (10–15 min): install the kit from `kit/`, paste a real Monday ticket, get a PRD and a plan against your real code.
+If this saved you an afternoon, a ⭐ helps other teams find it.
 
-Finished early, or want the advanced part? **[Two tickets at once, unattended](docs/parallel.md)**: `/ship` runs the whole loop with the PR as the only gate, a Stop hook keeps it honest, and two agents work in parallel worktrees.
-
-## Stuck?
-
-- **The agent wrote code during `/prd` or `/plan`.** Tell it: "You skipped a gate. Revert and follow the command." Then ask the facilitator.
-- **`/implement` says the plan is not accepted.** Open `docs/plans/<slug>.md` and check `status: accepted` is on the first lines, and that you committed.
-- **`gh pr create` fails.** Run `gh auth login`, or skip the PR: the branch is on your machine, review it with `git diff main`.
-- **Tests fail and the agent keeps looping.** Stop it (Esc), read the failing test yourself, and tell the agent what the test expects. Do not let it delete the test.
-- **Hook blocked a file.** Good. That is `.claude/hooks/protect_paths.js` doing its job. Ask why the agent wanted to touch it.
-- **Start over.** See "Reset" below.
-
-## What is in the repo
-
-```
-CLAUDE.md                     conventions the agent reads every session
-REVIEW.md                     the checklist every PR is reviewed against
-.claude/commands/prd.md       /prd <ticket>     -> docs/intent.md + docs/specs/<slug>.md, then STOPS
-.claude/commands/plan.md      /plan <slug>      -> docs/plans/<slug>.md, then STOPS
-.claude/commands/implement.md /implement <slug> -> branch, code, tests, PR, then STOPS
-.claude/commands/ship.md      /ship <ticket>    -> the whole loop unattended, PR is the only gate (docs/parallel.md)
-.claude/settings.json         hooks: cannot touch secrets; cannot finish with red tests. Allow-list for unattended runs
-docs/tickets.md               four tickets standing in for the Monday board
-docs/templates/spec.md        the PRD template
-scripts/doctor.js             npm run doctor: checks your setup
-.github/workflows/ci.yml      npm test on every PR
-kit/                          the five files to copy into your own repo (kit/install.js)
-```
-
-Three rules the repo enforces: nothing is implemented without an accepted plan; the agent opens PRs but never approves or merges them; findings rank, humans decide.
-
-To make rule two physical in your own repo: Settings → Branches → protect `main` → require a PR, the `test` check, and one approval.
-
-## Reset
-
-```bash
-git checkout main
-git branch -D feature/MON-101-<slug>
-git log --oneline            # find the "intent + spec", "accept", "plan" commits
-git revert --no-edit <oldest-sha>^..<newest-sha>
-```
-
-Or the blunt way: delete `docs/intent.md`, `docs/specs/*.md`, `docs/plans/*.md` and commit.
+MIT © [Dani Sofer](https://www.soferdani.com)
